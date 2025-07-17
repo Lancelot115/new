@@ -26,7 +26,6 @@ public class VistaPrincipal extends JFrame {
     // Identificadores de tarjetas
     public static final String TARJETA_INICIO = "INICIO";
     public static final String TARJETA_CLIENTES = "CLIENTES";
-    public static final String TARJETA_BUSCAR_CLIENTE = "BUSCAR_CLIENTE";
     public static final String TARJETA_AGREGAR_CLIENTE = "AGREGAR_CLIENTE";
     public static final String TARJETA_DETALLE_CLIENTE = "DETALLE_CLIENTE";
     public static final String TARJETA_USUARIOS = "USUARIOS";
@@ -34,7 +33,6 @@ public class VistaPrincipal extends JFrame {
     public static final String TARJETA_NUEVA_ACTIVIDAD = "NUEVA_ACTIVIDAD";
     public static final String TARJETA_ACTIVIDADES = "ACTIVIDADES";
     public static final String TARJETA_AGENDA = "AGENDA";
-    public static final String TARJETA_MESA = "MESA_CENTRAL";
     public static final String TARJETA_PRODUCTOS = "PRODUCTOS";
 
     private final CardLayout cardLayout;
@@ -48,8 +46,7 @@ public class VistaPrincipal extends JFrame {
     private final VistaClientes clientesPanel;
     private final VistaUsuarios usuariosPanel;
     private final VistaAgenda agendaPanel;
-    private final VistaMesaCentral mesaCentralPanel;
-    private final VistaActividadesPorCuenta actividadesPanel;
+    private final VistasActividades actividadesPanel;
     private final VistaProductosInstaladosPorCuenta productosPanel;
 
     private JPanel currentPanel;
@@ -86,8 +83,7 @@ public class VistaPrincipal extends JFrame {
         clientesPanel = new VistaClientes();
         usuariosPanel = new VistaUsuarios();
         agendaPanel = new VistaAgenda();
-        mesaCentralPanel = new VistaMesaCentral();
-        actividadesPanel = new VistaActividadesPorCuenta();
+        actividadesPanel = new VistasActividades();
         productosPanel = new VistaProductosInstaladosPorCuenta();
 
         // Crear el drawer con efecto de sombra
@@ -147,15 +143,6 @@ public class VistaPrincipal extends JFrame {
         panelContenedor.add(agendaPanel, TARJETA_AGENDA);
         panelContenedor.add(productosPanel, TARJETA_PRODUCTOS);
 
-        // Agregar paneles adicionales si existen
-        try {
-            Class<?> vistaBuscarClienteClass = Class.forName("vista.VistaBuscarCliente");
-            panelContenedor.add((JPanel) vistaBuscarClienteClass.getDeclaredConstructor().newInstance(),
-                    TARJETA_BUSCAR_CLIENTE);
-        } catch (Exception e) {
-            System.out.println("VistaBuscarCliente no encontrada");
-        }
-
         try {
             Class<?> vistaAgregarClienteClass = Class.forName("vista.VistaAgregarCliente");
             panelContenedor.add((JPanel) vistaAgregarClienteClass.getDeclaredConstructor().newInstance(),
@@ -168,7 +155,7 @@ public class VistaPrincipal extends JFrame {
         if (PermisoUtils.esAdministrador(usuario) || PermisoUtils.esSupervisor(usuario)) {
             panelContenedor.add(usuariosPanel, TARJETA_USUARIOS);
             panelContenedor.add(new VistaCrearUsuario(), TARJETA_CREAR_USUARIO);
-            panelContenedor.add(mesaCentralPanel, TARJETA_MESA);
+
         }
 
         // Paneles de actividades para todos
@@ -291,19 +278,13 @@ public class VistaPrincipal extends JFrame {
 
     public void actualizarAgenda() {
         if (agendaPanel != null) {
-            agendaPanel.actualizarAgenda();
-        }
-    }
-
-    public void actualizarMesaCentral() {
-        if (mesaCentralPanel != null) {
-            mesaCentralPanel.actualizarTabla();
+            agendaPanel.cargarAgenda();
         }
     }
 
     public void actualizarActividades() {
         if (actividadesPanel != null) {
-            actividadesPanel.actualizarTabla();
+            actividadesPanel.recargarTabla();
         }
     }
 
@@ -372,7 +353,21 @@ public class VistaPrincipal extends JFrame {
     public void mostrarActividades() {
         mostrarPanel(TARJETA_ACTIVIDADES);
         if (actividadesPanel != null) {
-            actividadesPanel.actualizarTabla();
+            actividadesPanel.recargarTabla();
         }
+    }
+
+    public void mostrarVistaListaClientes(VistaClientes vistaLista) {
+        SwingUtilities.invokeLater(() -> {
+            // Agregar la nueva vista al CardLayout (sin eliminar las otras)
+            panelContenedor.add(vistaLista, "LISTA_CLIENTES");
+
+            // Mostrar la vista
+            cardLayout.show(panelContenedor, "LISTA_CLIENTES");
+            panelContenedor.revalidate();
+            panelContenedor.repaint();
+
+            System.out.println("Vista Lista de Clientes cargada ✅");
+        });
     }
 }

@@ -1,6 +1,6 @@
-vista\VistaAgregarCliente$ShadowBorder.class
 vista\VistaAgregarCliente.class
 vista\VistaInicio.class
+validators\ActividadValidator.class
 vista\VistaClienteDetallePanel$2.class
 controladores\ControladorFunciones.class
 vista\DrawerPanel.class
@@ -25,8 +25,8 @@ vista\VistaMesaCentral.class
 vista\VistaAgregarCliente$3.class
 controladores\UsuarioControlador.class
 vista\componentes\LoadingSpinner.class
-vista\VistaCrearUsuario$3.class
 vista\VistaClientes$2.class
+validators\MesaCentralValidator.class
 BD\TestConexion.class
 entidades\DetalleOferta.class
 controladores\ControladorDetalle_ofertas.class
@@ -36,8 +36,6 @@ controladores\ControladorDetalle_adicionales.class
 controladores\ControladorUsuario_rol.class
 controladores\SolicitudControlador.class
 vista\drawer\MyDrawerBuilder.class
-vista\ClienteDetalleDialog.class
-vista\VistaAgregarCliente$6.class
 vista\VistaAgregarCliente$2.class
 entidades\Plan.class
 vista\ClienteDetalleListener.class
@@ -62,6 +60,7 @@ vista\drawer\component\SimpleDrawerBuilder.class
 controladores\ActividadesControlador.class
 controladores\ControladorDetalle_pedidos.class
 dao\AdicionalDAO.class
+vista\VistaAgenda$2.class
 vista\drawer\component\menu\MenuEvent.class
 dao\UsuarioRolDAO.class
 entidades\DetalleDescuento.class
@@ -75,6 +74,7 @@ vista\VistaCrearUsuario$1.class
 dao\DetalleAdicionalDAO.class
 entidades\Descuento.class
 entidades\Pais.class
+vista\VistasActividades$2.class
 dao\ProductoDAO.class
 dao\RolFuncionDAO.class
 entidades\DetallePedido.class
@@ -84,12 +84,9 @@ utils\GuavaUtils.class
 utils\PermisoUtils.class
 dao\DetallePedidoDAO.class
 vista\VistaMesaCentral$1.class
-vista\VistaCrearUsuario$4.class
 vista\VistaAgenda$1.class
-vista\VistaAgregarCliente$7.class
 vista\Login$2.class
 reportes\ReporteClientes.class
-vista\VistaCrearUsuario$ShadowBorder.class
 dao\MesaCentralDAO.class
 vista\VistaAgregarCliente$4.class
 controladores\ControladorProductosInstalados.class
@@ -102,9 +99,9 @@ vista\VistaUsuarios.class
 dao\DescuentoDAO.class
 vista\componentes\NotificacionPanel$1.class
 vista\Login$5.class
-vista\VistaCrearUsuario$ButtonHoverEffect.class
 vista\VistasActividades$1.class
 reportes\ReporteGenerator.class
+utils\BCryptUtil.class
 vista\componentes\UserHeaderPanel.class
 vista\DetalleActividadDialog.class
 vista\MainFrame.class
@@ -115,8 +112,9 @@ validators\ClienteValidator.class
 vista\Login.class
 controladores\ControladorAdicionales.class
 entidades\MesaCentral.class
-pruebas\PruebaCliente.class
+vista\VistaVerActividad.class
 entidades\Pedido.class
+vista\VistaClienteDetallePanel$3.class
 entidades\DetallePlan.class
 entidades\Comuna.class
 vista\VistaUsuarios$1.class
@@ -127,6 +125,7 @@ dao\FuncionDAO.class
 entidades\Cliente.class
 vista\util\UIHelper.class
 vista\VistaAgenda.class
+validators\UsuarioValidator.class
 vista\util\UIHelper$2.class
 dao\RolDAO.class
 controladores\OfertaControlador.class
@@ -134,6 +133,7 @@ entidades\Funcion.class
 entidades\ProductoInstalado.class
 BD\ConexionBD.class
 vista\DrawerButton.class
+vista\VistaClienteDetallePanel$4.class
 controladores\ControladorPaises.class
 dao\DetalleDescuentoDAO.class
 vista\VistaAgregarCliente$5.class
@@ -141,6 +141,7 @@ entidades\Adicional.class
 entidades\Producto.class
 dao\UsuarioDAO.class
 vista\VistaClienteDetallePanel.class
+utils\FacturaPDFGenerator.class
 entidades\RolFuncion.class
 vista\Login$1.class
 vista\VistaClientes.class
@@ -154,6 +155,7 @@ vista\VistaNuevaActividad.class
 entidades\DetalleAdicional.class
 ren\main\main.class
 vista\util\UIHelper$ElevatedPanel.class
+Pruebas\PruebaCliente.class
 controladores\RolControlador.class
 vista\drawer\component\footer\SimpleFooterData.class
 vista\VistaActividadesPorCuenta$1.class

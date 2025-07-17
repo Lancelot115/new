@@ -4,17 +4,18 @@
  */
 package vista;
 
-
 import controladores.ActividadesControlador;
 import controladores.ControladorMesa_central;
 import entidades.Actividad;
 import entidades.MesaCentral;
+import validators.MesaCentralValidator;
 import java.awt.FlowLayout;
 import java.awt.Window;
 import java.sql.Timestamp;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import java.util.Optional;
+import ren.main.main;
 
 public class VistaEditarActividad extends JDialog {
 
@@ -22,10 +23,17 @@ public class VistaEditarActividad extends JDialog {
     private final JTextField txtLugarMesaCentral = new JTextField();
     private final JTextField txtTelefonoCliente = new JTextField();
     private final JTextField txtEmailCliente = new JTextField();
-    private final JComboBox<String> comboBoxTipoActividad = new JComboBox<>(new String[]{"LLAMADA ENTRANTE", "LLAMADA SALIENTE", "SMS", "CORREO"});
-    private final JComboBox<String> cmbRazon = new JComboBox<>(new String[]{"COMERCIAL  HFC/FFTH", "TECNICA HFC/FFTH", "RETENCIONES HFC/FFTH", "RETENCIONES PREMIUN HFC/FFTH", "OTT", "BOTON ROJO HFC/FFTH", "DTH", "VENTAS HOGAR", "MOVIL POSTPAGO", "MOVIL PREPAGO"});
-    private final JComboBox<String> cmbDetalle = new JComboBox<>(new String[]{"CONSULTA BOLETAS","MESA CENTRAL", "EXPLICACION DE BOLETAS", "CAMBIO DE PLAN", "MIGRACION BACKOFFICE FFTH", "ACTIVACION PLATAFORMAS STREAMING HOGAR", "ACTIVACION PLATAFORMAS STREAMING MOVIL", "VENTAS HOGAR", "VENTAS MOVIL", "GESTION INTERNA", "AJUSTE DE BOLETA", "DESCUENTO NO APLICADO", "DESCONOCIMIENTO PROPORCIONALES", "INHIBICION", "SUSPENSION TRANSITORIA"});
-    private final JComboBox<String> cmbResolucion = new JComboBox<>(new String[]{"PENDIENTE", "FINALIZADO"});
+    private final JComboBox<String> comboBoxTipoActividad = new JComboBox<>(
+            new String[] { "LLAMADA ENTRANTE", "LLAMADA SALIENTE", "SMS", "CORREO" });
+    private final JComboBox<String> cmbRazon = new JComboBox<>(new String[] { "COMERCIAL  HFC/FFTH", "TECNICA HFC/FFTH",
+            "RETENCIONES HFC/FFTH", "RETENCIONES PREMIUN HFC/FFTH", "OTT", "BOTON ROJO HFC/FFTH", "DTH", "VENTAS HOGAR",
+            "MOVIL POSTPAGO", "MOVIL PREPAGO" });
+    private final JComboBox<String> cmbDetalle = new JComboBox<>(new String[] { "CONSULTA BOLETAS", "MESA CENTRAL",
+            "EXPLICACION DE BOLETAS", "CAMBIO DE PLAN", "MIGRACION BACKOFFICE FFTH",
+            "ACTIVACION PLATAFORMAS STREAMING HOGAR", "ACTIVACION PLATAFORMAS STREAMING MOVIL", "VENTAS HOGAR",
+            "VENTAS MOVIL", "GESTION INTERNA", "AJUSTE DE BOLETA", "DESCUENTO NO APLICADO",
+            "DESCONOCIMIENTO PROPORCIONALES", "INHIBICION", "SUSPENSION TRANSITORIA" });
+    private final JComboBox<String> cmbResolucion = new JComboBox<>(new String[] { "PENDIENTE", "FINALIZADO" });
     private final JTextArea txaDescripcion = new JTextArea(4, 20);
     private final JTextArea txaObservacion = new JTextArea(4, 20);
 
@@ -122,12 +130,14 @@ public class VistaEditarActividad extends JDialog {
         String lugarMesa = txtLugarMesaCentral.getText().trim();
 
         if (descripcion.isEmpty() || observacion.isEmpty() || telefono.isEmpty() || correo.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Validación", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Validación",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         if (!correo.matches("^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$")) {
-            JOptionPane.showMessageDialog(this, "Correo electrónico inválido.", "Validación", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Correo electrónico inválido.", "Validación",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -151,7 +161,8 @@ public class VistaEditarActividad extends JDialog {
         if (actualizado) {
             if (!numeroMesa.isEmpty() && numeroMesa.matches("^9\\d{8}$")) {
                 if (lugarMesa.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Debe indicar un lugar para la mesa central.", "Validación", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Debe indicar un lugar para la mesa central.", "Validación",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -168,10 +179,16 @@ public class VistaEditarActividad extends JDialog {
                 }
             }
 
-            JOptionPane.showMessageDialog(this, "Actividad actualizada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Actividad actualizada exitosamente.", "Éxito",
+                    JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "No se pudo actualizar la actividad.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No se pudo actualizar la actividad.", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        if (main.ventanap != null) {
+            main.ventanap.refrescarTablaActividades();
         }
     }
 }

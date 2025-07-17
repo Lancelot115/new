@@ -2,6 +2,7 @@ package controladores;
 
 import entidades.Usuario;
 import BD.ConexionBD;
+import dao.UsuarioDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,38 +26,8 @@ public class ControladorUsuarios {
      * @return objeto Usuario si es válido, null si no existe
      */
     public Usuario validarLogin(String idUsuario, String clave) {
-        Usuario user = null;
-
-        try {
-            String sql = "SELECT * FROM USUARIOS WHERE IDUSUARIO = ? AND CLAVE = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, idUsuario);
-            ps.setString(2, clave);
-
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                user = new Usuario(
-                    rs.getString("IDUSUARIO"),
-                    rs.getString("RUT"),
-                    rs.getString("IDROL"),
-                    rs.getString("IDPAIS"),
-                    rs.getString("CLAVE"),
-                    rs.getString("NOMBRES"),
-                    rs.getString("APELLIDOP"),
-                    rs.getString("APELLIDOM"),
-                    rs.getString("AREA"),
-                    rs.getDate("FECHA_CREACION")
-                );
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Error al validar login: " + e.getMessage());
-        }
-
-        return user;
+       return  new UsuarioDAO().validarLogin(idUsuario, clave);
     }
-
     /**
      * Valida las credenciales del usuario.
      * @param usuario Nombre de usuario
@@ -99,21 +70,7 @@ public class ControladorUsuarios {
      * @param user Objeto Usuario con datos a insertar
      * @throws SQLException si ocurre un error de BD
      */
-    public void crearUsuario(Usuario user) throws SQLException {
-        String sql = "INSERT INTO USUARIOS (IDUSUARIO, RUT, IDROL, IDPAIS, CLAVE, NOMBRES, APELLIDOP, APELLIDOM, AREA, FECHA_CREACION) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, user.getIdUsuario());
-        ps.setString(2, user.getRut());
-        // Asignar rol y país por defecto si no están definidos
-        ps.setString(3, user.getIdRol() != null ? user.getIdRol() : "D001");
-        ps.setString(4, user.getIdPais() != null ? user.getIdPais() : "CHL");
-        ps.setString(5, user.getClave());
-        ps.setString(6, user.getNombres());
-        ps.setString(7, user.getApellidoP());
-        ps.setString(8, user.getApellidoM());
-        // Área opcional
-        ps.setString(9, user.getArea() != null ? user.getArea() : "");
-        ps.setDate(10, new java.sql.Date(System.currentTimeMillis()));
-        ps.executeUpdate();
-    }
+   
+    
+    
 }

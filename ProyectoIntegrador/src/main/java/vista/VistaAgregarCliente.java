@@ -1,34 +1,27 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package vista;
 
 import controladores.ClienteControlador;
+import controladores.ComunasControlador;
+import controladores.CuentasClienteControlador;
 import entidades.Cliente;
+import entidades.Comuna;
 import validators.ClienteValidator;
+
 import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.UUID;
 
-/**
- *
- * @author mathi
- */
-
-/**
- * MVC – VistaAgregarCliente (Vista):
- *   • Construye el formulario de alta de cliente + cuenta
- *   • SRP: solo maneja la interfaz y eventos, delegando la lógica a los controladores
- */
 public class VistaAgregarCliente extends JPanel {
-    private final ClienteControlador controlador;
+    private final ClienteControlador clienteControlador = new ClienteControlador();
+    private final ComunasControlador comunasControlador = new ComunasControlador();
 
-    // Inicialización de campos en la declaración
     private final JTextField txtRut = new JTextField();
     private final JTextField txtCorreo = new JTextField();
     private final JTextField txtNombres = new JTextField();
@@ -37,108 +30,118 @@ public class VistaAgregarCliente extends JPanel {
     private final JTextField txtTelefono = new JTextField();
     private final JTextField txtEdad = new JTextField();
     private final JTextField txtDireccion = new JTextField();
-    private final JTextField txtComuna = new JTextField();
+    private final JComboBox<String> comboComuna = new JComboBox<>();
 
-    // Labels para mostrar errores
     private final JLabel lblErrorRut = new JLabel();
     private final JLabel lblErrorCorreo = new JLabel();
     private final JLabel lblErrorNombres = new JLabel();
     private final JLabel lblErrorTelefono = new JLabel();
     private final JLabel lblErrorEdad = new JLabel();
 
-    // Bordes para indicar estado de validación
-    private final Border bordeNormal = BorderFactory.createLineBorder(Color.GRAY);
-    private final Border bordeError = BorderFactory.createLineBorder(Color.RED);
-    private final Border bordeValido = BorderFactory.createLineBorder(new Color(0, 150, 0));
+    private final Border bordeNormal = BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true);
+    private final Border bordeError = BorderFactory.createLineBorder(new Color(211, 47, 47), 2, true);
+    private final Border bordeValido = BorderFactory.createLineBorder(new Color(46, 125, 50), 2, true);
 
-    // Colores del tema
-    private static final Color COLOR_PRIMARIO = new Color(237, 28, 36);    // Rojo Kaiser
-    private static final Color COLOR_SECUNDARIO = new Color(33, 33, 33);   // Gris oscuro
+    private static final Color COLOR_PRIMARIO = new Color(237, 28, 36);
+    private static final Color COLOR_SECUNDARIO = new Color(33, 33, 33);
     private static final Color COLOR_FONDO = Color.WHITE;
-    private static final Color COLOR_EXITO = new Color(46, 125, 50);       // Verde
-    private static final Color COLOR_ERROR = new Color(211, 47, 47);       // Rojo error
+    private static final Color COLOR_ERROR = new Color(211, 47, 47);
+    private static final Font FUENTE_LABEL = new Font("Segoe UI", Font.PLAIN, 15);
+    private static final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 24);
+    private static final Font FUENTE_BOTON = new Font("Segoe UI", Font.BOLD, 16);
 
     public VistaAgregarCliente() {
-        controlador = new ClienteControlador();
-        setLayout(new MigLayout("insets 20, fillx, gap 10 10", "[right][grow,fill][]"));
-        setBackground(COLOR_FONDO);
+        setLayout(new BorderLayout());
+        setBackground(new Color(245, 245, 245));
 
-        // Panel principal con efecto de elevación
-        JPanel mainPanel = new JPanel(new MigLayout("insets 30, fillx, gap 15 15", "[right][grow,fill][]"));
+        // Panel de título con icono SVG
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titlePanel.setBackground(new Color(245, 245, 245));
+        JLabel icon = new JLabel(new FlatSVGIcon("imagenes/icons/add-client.svg", 32, 32));
+        JLabel title = new JLabel("Registro de Cliente");
+        title.setFont(FUENTE_TITULO);
+        title.setForeground(COLOR_SECUNDARIO);
+        titlePanel.add(icon);
+        titlePanel.add(Box.createHorizontalStrut(10));
+        titlePanel.add(title);
+        add(titlePanel, BorderLayout.NORTH);
+
+        // Panel principal elevado
+        JPanel mainPanel = new vista.util.UIHelper.ElevatedPanel();
         mainPanel.setBackground(COLOR_FONDO);
-        mainPanel.setBorder(new CompoundBorder(
-            new EmptyBorder(10, 10, 10, 10),
-            BorderFactory.createCompoundBorder(
-                new ShadowBorder(),
-                BorderFactory.createLineBorder(new Color(0, 0, 0, 20))
-            )
-        ));
+        mainPanel.setBorder(new EmptyBorder(30, 40, 30, 40));
+        mainPanel.setLayout(new MigLayout("wrap 2, gap 20 10", "[right][grow,fill]"));
 
-        // Título
-        JLabel titulo = new JLabel("Registro de Cliente");
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        titulo.setForeground(COLOR_PRIMARIO);
-        mainPanel.add(titulo, "span, center, gapbottom 20, wrap");
-
-        // Configurar campos
         configurarCampos();
-
-        // Agregar campos al panel
+        llenarComboComunas();
         agregarCamposAlPanel(mainPanel);
 
-        // Panel de botones
-        JPanel buttonPanel = new JPanel(new MigLayout("insets 0, gap 10", "[grow,right]"));
+        // Separador visual
+        mainPanel.add(new JSeparator(), "span, growx, gaptop 10, gapbottom 10");
+
+        // Botones grandes con iconos SVG
+        JButton btnGuardar = new JButton("Guardar", new FlatSVGIcon("imagenes/icons/save.svg", 18, 18));
+        JButton btnLimpiar = new JButton("Limpiar", new FlatSVGIcon("imagenes/icons/clear.svg", 18, 18));
+        btnGuardar.setBackground(new Color(33, 150, 243));
+        btnGuardar.setForeground(Color.WHITE);
+        btnGuardar.setFont(FUENTE_BOTON);
+        btnGuardar.setPreferredSize(new Dimension(160, 40));
+        btnGuardar.setFocusPainted(false);
+        btnGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnGuardar.putClientProperty(FlatClientProperties.STYLE, "arc:16");
+
+        btnLimpiar.setBackground(new Color(158, 158, 158));
+        btnLimpiar.setForeground(Color.WHITE);
+        btnLimpiar.setFont(FUENTE_BOTON);
+        btnLimpiar.setPreferredSize(new Dimension(160, 40));
+        btnLimpiar.setFocusPainted(false);
+        btnLimpiar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnLimpiar.putClientProperty(FlatClientProperties.STYLE, "arc:16");
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setOpaque(false);
-
-        JButton btnGuardar = crearBotonEstilizado("Guardar", COLOR_PRIMARIO);
-        JButton btnLimpiar = crearBotonEstilizado("Limpiar", COLOR_SECUNDARIO);
-
-        buttonPanel.add(btnLimpiar, "split 2");
+        buttonPanel.add(btnLimpiar);
         buttonPanel.add(btnGuardar);
-        mainPanel.add(buttonPanel, "span, growx, wrap");
+        mainPanel.add(buttonPanel, "span, growx, gaptop 10");
 
-        // Agregar el panel principal
-        add(mainPanel, "grow");
+        add(mainPanel, BorderLayout.CENTER);
 
-        // Eventos
         btnGuardar.addActionListener(e -> guardarCliente());
         btnLimpiar.addActionListener(e -> limpiarCampos());
 
-        // Configurar validaciones
         configurarValidaciones();
     }
 
     private void configurarCampos() {
-        // Configurar placeholders y estilos para cada campo
-        configurarCampoTexto(txtRut, "Ingrese RUT");
-        configurarCampoTexto(txtCorreo, "Ingrese correo electrónico");
-        configurarCampoTexto(txtNombres, "Ingrese nombres");
-        configurarCampoTexto(txtApellidoP, "Ingrese apellido paterno");
-        configurarCampoTexto(txtApellidoM, "Ingrese apellido materno");
-        configurarCampoTexto(txtTelefono, "Ingrese teléfono");
-        configurarCampoTexto(txtEdad, "Ingrese edad");
-        configurarCampoTexto(txtDireccion, "Ingrese dirección");
-        configurarCampoTexto(txtComuna, "Ingrese comuna");
+        configurarCampoTexto(txtRut, "Ej: 12.345.678-9", "Ingrese el RUT del cliente");
+        configurarCampoTexto(txtCorreo, "Ej: correo@ejemplo.com", "Ingrese el correo electrónico");
+        configurarCampoTexto(txtNombres, "Ej: Juan Carlos", "Ingrese los nombres del cliente");
+        configurarCampoTexto(txtApellidoP, "Ej: Pérez", "Ingrese el apellido paterno");
+        configurarCampoTexto(txtApellidoM, "Ej: González", "Ingrese el apellido materno");
+        configurarCampoTexto(txtTelefono, "Ej: 912345678", "Ingrese el teléfono (9 dígitos)");
+        configurarCampoTexto(txtEdad, "Ej: 30", "Ingrese la edad (18-120)");
+        configurarCampoTexto(txtDireccion, "Ej: Av. Siempre Viva 123", "Ingrese la dirección");
     }
 
-    private void configurarCampoTexto(JTextField campo, String placeholder) {
+    private void configurarCampoTexto(JTextField campo, String placeholder, String tooltip) {
         campo.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
-        campo.putClientProperty(FlatClientProperties.STYLE, "" +
-            "arc: 8;" +
-            "focusWidth: 1;" +
-            "focusColor: " + String.format("#%02x%02x%02x",
-                COLOR_PRIMARIO.getRed(),
-                COLOR_PRIMARIO.getGreen(),
-                COLOR_PRIMARIO.getBlue()) + ";" +
-            "borderWidth: 1");
+        campo.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderWidth:2;");
+        campo.setBorder(bordeNormal);
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        campo.setToolTipText(tooltip);
     }
 
-    private void configurarValidaciones() {
-        configurarValidacionRut();
-        configurarValidacionCorreo();
-        configurarValidacionNombres();
-        configurarValidacionTelefono();
-        configurarValidacionEdad();
+    private void llenarComboComunas() {
+        List<Comuna> comunas = comunasControlador.listarComunas();
+        for (Comuna c : comunas) {
+            comboComuna.addItem(c.getDescripcion());
+        }
+        comboComuna.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        comboComuna.setBackground(Color.WHITE);
+        comboComuna.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        comboComuna.setToolTipText("Seleccione la comuna de residencia");
     }
 
     private void agregarCamposAlPanel(JPanel panel) {
@@ -150,91 +153,51 @@ public class VistaAgregarCliente extends JPanel {
         agregarCampoConLabel(panel, "Teléfono:", txtTelefono, lblErrorTelefono);
         agregarCampoConLabel(panel, "Edad:", txtEdad, lblErrorEdad);
         agregarCampoConLabel(panel, "Dirección:", txtDireccion, null);
-        agregarCampoConLabel(panel, "Comuna:", txtComuna, null);
+
+        JLabel lblComuna = new JLabel("Comuna:");
+        lblComuna.setFont(FUENTE_LABEL);
+        panel.add(lblComuna);
+        panel.add(comboComuna, "wrap");
     }
 
     private void agregarCampoConLabel(JPanel panel, String labelText, JTextField field, JLabel errorLabel) {
         JLabel label = new JLabel(labelText);
+        label.setFont(FUENTE_LABEL);
         label.setForeground(COLOR_SECUNDARIO);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
         panel.add(label);
-        panel.add(field);
-
+        JPanel fieldPanel = new JPanel(new BorderLayout());
+        fieldPanel.setOpaque(false);
+        fieldPanel.add(field, BorderLayout.CENTER);
         if (errorLabel != null) {
             errorLabel.setForeground(COLOR_ERROR);
             errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-            panel.add(errorLabel, "wrap");
-        } else {
-            panel.add(new JLabel(), "wrap");
+            errorLabel.setBorder(new EmptyBorder(2, 8, 0, 0));
+            fieldPanel.add(errorLabel, BorderLayout.SOUTH);
         }
+        panel.add(fieldPanel, "wrap");
     }
 
-    private JButton crearBotonEstilizado(String texto, Color color) {
-        JButton button = new JButton(texto);
-        button.setForeground(Color.WHITE);
-        button.setBackground(color);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
-    // Clase interna para el borde con sombra
-    private class ShadowBorder extends AbstractBorder {
-        @Override
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            int shadow = 3;
-            for (int i = 0; i < shadow; i++) {
-                g2.setColor(new Color(0, 0, 0, 20 - i * 6));
-                g2.drawRoundRect(x + i, y + i, width - 2 * i - 1, height - 2 * i - 1, 8, 8);
-            }
-            g2.dispose();
-        }
-
-        @Override
-        public Insets getBorderInsets(Component c) {
-            return new Insets(4, 4, 4, 4);
-        }
-    }
-
-    private void configurarLabelError(JLabel label) {
-        label.setForeground(Color.RED);
-        label.setFont(label.getFont().deriveFont(11f));
-    }
-
-    private void configurarValidacionRut() {
+    private void configurarValidaciones() {
         txtRut.addFocusListener(new FocusAdapter() {
-            @Override
             public void focusLost(FocusEvent e) {
-                if (ClienteValidator.isRutValido(txtRut.getText())) {
-                    txtRut.setBorder(bordeValido);
-                    lblErrorRut.setText("");
-                    txtRut.setText(ClienteValidator.formatearRut(txtRut.getText()));
+                String rut = txtRut.getText();
+                if (ClienteValidator.isRutValido(rut)) {
+                    txtRut.setText(ClienteValidator.formatearRut(rut));
+                    if (clienteControlador.obtenerClientePorRut(rut) == null) {
+                        txtRut.setBorder(bordeValido);
+                        lblErrorRut.setText("");
+                    } else {
+                        txtRut.setBorder(bordeError);
+                        lblErrorRut.setText("RUT ya existe");
+                    }
                 } else {
                     txtRut.setBorder(bordeError);
                     lblErrorRut.setText("RUT inválido");
                 }
             }
         });
-    }
 
-    private void configurarValidacionCorreo() {
         txtCorreo.addFocusListener(new FocusAdapter() {
-            @Override
             public void focusLost(FocusEvent e) {
                 if (ClienteValidator.isEmailValido(txtCorreo.getText())) {
                     txtCorreo.setBorder(bordeValido);
@@ -245,30 +208,12 @@ public class VistaAgregarCliente extends JPanel {
                 }
             }
         });
-    }
 
-    private void configurarValidacionNombres() {
-        FocusAdapter validadorNombre = new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                JTextField campo = (JTextField) e.getComponent();
-                if (ClienteValidator.isNombreValido(campo.getText())) {
-                    campo.setBorder(bordeValido);
-                    lblErrorNombres.setText("");
-                } else {
-                    campo.setBorder(bordeError);
-                    lblErrorNombres.setText("Solo letras permitidas");
-                }
-            }
-        };
-        txtNombres.addFocusListener(validadorNombre);
-        txtApellidoP.addFocusListener(validadorNombre);
-        txtApellidoM.addFocusListener(validadorNombre);
-    }
+        txtNombres.addFocusListener(validarNombre(txtNombres, lblErrorNombres));
+        txtApellidoP.addFocusListener(validarNombre(txtApellidoP, null));
+        txtApellidoM.addFocusListener(validarNombre(txtApellidoM, null));
 
-    private void configurarValidacionTelefono() {
         txtTelefono.addFocusListener(new FocusAdapter() {
-            @Override
             public void focusLost(FocusEvent e) {
                 if (ClienteValidator.isTelefonoValido(txtTelefono.getText())) {
                     txtTelefono.setBorder(bordeValido);
@@ -279,11 +224,8 @@ public class VistaAgregarCliente extends JPanel {
                 }
             }
         });
-    }
 
-    private void configurarValidacionEdad() {
         txtEdad.addFocusListener(new FocusAdapter() {
-            @Override
             public void focusLost(FocusEvent e) {
                 try {
                     int edad = Integer.parseInt(txtEdad.getText());
@@ -292,20 +234,45 @@ public class VistaAgregarCliente extends JPanel {
                         lblErrorEdad.setText("");
                     } else {
                         txtEdad.setBorder(bordeError);
-                        lblErrorEdad.setText("Edad debe ser entre 18 y 120");
+                        lblErrorEdad.setText("Edad entre 18 y 120");
                     }
                 } catch (NumberFormatException ex) {
                     txtEdad.setBorder(bordeError);
-                    lblErrorEdad.setText("Ingrese un número válido");
+                    lblErrorEdad.setText("Edad inválida");
                 }
             }
         });
     }
 
+    private FocusAdapter validarNombre(JTextField campo, JLabel lblError) {
+        return new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                if (ClienteValidator.isNombreValido(campo.getText())) {
+                    campo.setBorder(bordeValido);
+                    if (lblError != null)
+                        lblError.setText("");
+                } else {
+                    campo.setBorder(bordeError);
+                    if (lblError != null)
+                        lblError.setText("Solo letras");
+                }
+            }
+        };
+    }
+
     private void guardarCliente() {
         try {
+            String rut = txtRut.getText().trim();
+            if (clienteControlador.obtenerClientePorRut(rut) != null) {
+                JOptionPane.showMessageDialog(this, "RUT ya registrado", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String comunaNombre = (String) comboComuna.getSelectedItem();
+            String idComuna = comunasControlador.obtenerIdPorDescripcion(comunaNombre);
+
             Cliente cliente = new Cliente();
-            cliente.setRut(txtRut.getText());
+            cliente.setRut(rut);
             cliente.setCorreo(txtCorreo.getText());
             cliente.setNombres(txtNombres.getText());
             cliente.setApellidoP(txtApellidoP.getText());
@@ -313,23 +280,22 @@ public class VistaAgregarCliente extends JPanel {
             cliente.setTelefono(Long.parseLong(txtTelefono.getText()));
             cliente.setEdad(Byte.parseByte(txtEdad.getText()));
             cliente.setDireccion(txtDireccion.getText());
-            cliente.setIdComuna(txtComuna.getText());
+            cliente.setIdComuna(idComuna);
 
-            List<String> errores = controlador.crearClienteConValidacion(cliente);
+            List<String> errores = clienteControlador.crearClienteConValidacion(cliente);
             if (errores == null) {
-                JOptionPane.showMessageDialog(this,
-                    "Cliente guardado exitosamente",
-                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                String idCuenta = CuentasClienteControlador.generarIdCuentaUnico("CLIENTE");
+                new CuentasClienteControlador().insertar(idCuenta, rut, "CLIENTE");
+                JOptionPane.showMessageDialog(this, "Cliente y cuenta registrados", "Éxito",
+                        JOptionPane.INFORMATION_MESSAGE);
                 limpiarCampos();
             } else {
-                JOptionPane.showMessageDialog(this,
-                    String.join("\n", errores),
-                    "Error de validación", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, String.join("\n", errores), "Errores de validación",
+                        JOptionPane.ERROR_MESSAGE);
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this,
-                "Por favor, revise los campos numéricos",
-                "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al guardar: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -342,9 +308,8 @@ public class VistaAgregarCliente extends JPanel {
         txtTelefono.setText("");
         txtEdad.setText("");
         txtDireccion.setText("");
-        txtComuna.setText("");
+        comboComuna.setSelectedIndex(0);
 
-        // Restaurar bordes solo de los JTextField
         txtRut.setBorder(bordeNormal);
         txtCorreo.setBorder(bordeNormal);
         txtNombres.setBorder(bordeNormal);
@@ -353,35 +318,11 @@ public class VistaAgregarCliente extends JPanel {
         txtTelefono.setBorder(bordeNormal);
         txtEdad.setBorder(bordeNormal);
         txtDireccion.setBorder(bordeNormal);
-        txtComuna.setBorder(bordeNormal);
 
-        // Limpiar mensajes de error
         lblErrorRut.setText("");
         lblErrorCorreo.setText("");
         lblErrorNombres.setText("");
         lblErrorTelefono.setText("");
         lblErrorEdad.setText("");
-
-        // Efecto de transición al limpiar
-        Timer timer = new Timer(50, new ActionListener() {
-            float alpha = 1.0f;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                alpha -= 0.1f;
-                if (alpha <= 0.0f) {
-                    ((Timer)e.getSource()).stop();
-                    setBackground(COLOR_FONDO);
-                } else {
-                    setBackground(new Color(
-                        COLOR_FONDO.getRed()/255f,
-                        COLOR_FONDO.getGreen()/255f,
-                        COLOR_FONDO.getBlue()/255f,
-                        alpha));
-                }
-                repaint();
-            }
-        });
-        timer.start();
     }
 }
